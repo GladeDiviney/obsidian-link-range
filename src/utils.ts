@@ -6,7 +6,8 @@ export interface ParsedLink {
 	note: string;
 	h1: string;
 	h2?: string;
-	altText?: string;
+	altText: string;
+	pattern?: Pattern;
 	file?: TFile;
 	h1Line?: number;
 	h2Line?: number;
@@ -29,12 +30,13 @@ export function checkLinkText(href: string, settings: LinkRangeSettings): Parsed
 	const h2 = split[1];
 
 	let altText = undefined;
+	let pattern = undefined;
 
 	if (matches?.length > 3 && matches[3] != undefined) {
 		altText = matches[3]
 	}
 	else {
-		const pattern = findPatternForFile(note, settings);
+		pattern = findPatternForFile(note, settings);
 		const baseNote = path.basename(note)
 		const headingVisual = pattern.headingVisual === '' ? '#' : pattern.headingVisual;
 		const headingSeparatorVisual = pattern.headingSeparatorVisual === '' ? settings.headingSeparator : pattern.headingSeparatorVisual;
@@ -46,7 +48,7 @@ export function checkLinkText(href: string, settings: LinkRangeSettings): Parsed
 			altText = `${baseNote}${headingVisual}${h1}`
 		}
 	}
-	return { note, h1, h2, altText }
+	return { note, h1, h2, altText, pattern }
 }
 
 export function checkLink(app :App, linkHTML: HTMLElement, settings: LinkRangeSettings, isEmbed=false, hrefField = "data-href"): ParsedLink | null {
