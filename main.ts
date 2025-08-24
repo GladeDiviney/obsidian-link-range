@@ -3,7 +3,7 @@ import { around } from "monkey-around";
 import { ViewPlugin } from "@codemirror/view";
 import { DEFAULT_SETTINGS, LinkRangeSettings, LinkRangeSettingTab } from 'src/settings';
 import { linkRangePostProcessor } from 'src/markdownPostProcessor';
-import { checkLink } from 'src/utils';
+import { parseLink } from 'src/utils';
 import { LifePreviewEmbedReplacer } from 'src/livePreviewEmbedReplacer';
 import { buildCMViewPlugin } from 'src/livePreviewDisplayView';
 import { Prec } from "@codemirror/state";
@@ -19,9 +19,8 @@ export default class LinkRange extends Plugin {
 
 		const settings = this.settings;
 
-		// on page load, update hrefs to strip off second header to handle clickthrough, and add new range-href field
-		this.registerMarkdownPostProcessor((el, ctx) => {
-			linkRangePostProcessor(this.app, el, ctx, settings)
+		this.registerMarkdownPostProcessor((el) => {
+			linkRangePostProcessor(el, settings)
 		});
 
 		// wait for layout to be ready
@@ -34,8 +33,6 @@ export default class LinkRange extends Plugin {
 			this.registerEditorExtension(ext);
 
 			const pagePreviewPlugin = this.app.internalPlugins.plugins["page-preview"];
-
-			console.log("LinkRange: Hooking into page-preview onHover calls")
 			
 			// intercept page-preview plugin
 			const uninstaller = around(pagePreviewPlugin.instance.constructor.prototype, {
@@ -54,7 +51,7 @@ export default class LinkRange extends Plugin {
 						...args: unknown[]
 					) {
 						// parse link using the added range-href field
-						const res = checkLink(this.app, targetEl, settings, false, "range-href")
+						const res = parseLink(this.app, targetEl, settings, false, "range-href")
 						if (res !== null) {
 							old.call(this, parent, targetEl, res.note, path, {scroll:res.h1Line}, ...args)
 						} else {

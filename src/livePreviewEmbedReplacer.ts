@@ -8,20 +8,19 @@ export class LifePreviewEmbedReplacer implements PluginValue {
 	decorations: DecorationSet = Decoration.none;
 	settings: LinkRangeSettings;
 	app: App;
+	embedCount: number;
 
 	constructor(settings: LinkRangeSettings, app: App) {
 		this.settings = settings;
 		this.app = app;
+		this.embedCount = 0;
 	}
 
-	buildDecorations(view: EditorView): DecorationSet {
+	buildDecorations(view: EditorView, embeds: NodeList): DecorationSet {
 		const buffer = new RangeSetBuilder<Decoration>()
-		const embeds = view.contentDOM.querySelectorAll("div.markdown-embed");
-
 		embeds.forEach(embed => {
-			replaceEmbed(this.app, embed, this.settings)
-		})
-
+			replaceEmbed(embed, this.settings)
+		});
 		return buffer.finish();
 	}
 
@@ -31,9 +30,11 @@ export class LifePreviewEmbedReplacer implements PluginValue {
 			this.decorations = Decoration.none;
 			return;
 		}
+		const embeds = update.view.contentDOM.querySelectorAll("div.markdown-embed");
 
-		if ( update.docChanged || update.viewportChanged || update.focusChanged ) {
-			this.decorations = this.buildDecorations(update.view);
+		if ((embeds.length > 0 && embeds.length != this.embedCount) || update.docChanged) {
+			this.embedCount = embeds.length;
+			this.decorations = this.buildDecorations(update.view, embeds);
 		}
 	}	
 }
