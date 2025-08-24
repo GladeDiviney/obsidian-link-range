@@ -1,10 +1,10 @@
 {
 	"id": "link-range",
 	"name": "Link Range",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "This Obsidian plugin brings ranged link support to Obsidian.",
-	"author": "Ryan Mellmer and Eric Sowell",
+	"author": "Glade Diviney, Ryan Mellmer and Eric Sowell",
 	"authorUrl": "https://ryanmellmer.com, https://ericsowell.com",
 	"isDesktopOnly": false
 }

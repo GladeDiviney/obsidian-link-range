@@ -1,6 +1,5 @@
 import { App, TFile } from "obsidian";
 import { LinkRangeSettings, Pattern } from "./settings";
-import * as path from 'path';
 
 export interface ParsedLink {
 	// NAME in [[NAME#H1..H2|ALT]]
@@ -34,8 +33,8 @@ function parseHrefLink(href: string, settings: LinkRangeSettings): ParsedLink | 
 
 	// Locate the referenced file, including partial paths
 	const partialPath = note + ".md"
-	const basePart = path.basename(note)
-		const file: TFile | undefined = app.vault.getMarkdownFiles().filter(
+	const basePart = note.split("/").last();
+	const file: TFile | undefined = app.vault.getMarkdownFiles().filter(
 		x => x.basename == basePart && x.path.endsWith(partialPath)
 	).first()
 
