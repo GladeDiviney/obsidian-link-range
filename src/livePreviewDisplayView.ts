@@ -3,7 +3,7 @@ import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetTy
 import { RangeSetBuilder } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { LinkRangeSettings } from "./settings";
-import { findPatternForFile } from './utils';
+import { findPatternForFilename as findPatternForFilename } from './utils';
 
 class CharacterOverwriteWidget extends WidgetType {
 
@@ -101,8 +101,8 @@ export function buildCMViewPlugin(app: App, settings: LinkRangeSettings) {
                                         if (!inLastPass(node.from - 2, location?.from)) {
                                         
                                             const fileName = linkText.substring(0, indexOfHeaderMarker);
-                                            const pattern = findPatternForFile(fileName, settings);                                            
-                                            
+                                            const pattern = findPatternForFilename(fileName, settings);
+
                                             // Overrides the heading character ('#') to what is specified in settings
                                             if (pattern.headingVisual !== '') {
                                                 let overrideP2HWidget = Decoration.widget({

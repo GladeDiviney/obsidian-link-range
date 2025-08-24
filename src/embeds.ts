@@ -1,32 +1,26 @@
 import { App, MarkdownRenderer, setIcon, TFile } from "obsidian";
 import { LinkRangeSettings } from "./settings";
-import { checkLink } from "./utils";
+import { parseLink } from "./utils";
 
-export async function replaceEmbed(app: App, embed: Node, settings: LinkRangeSettings, isMarkdownPost = false) {
+export async function replaceEmbed(embed: Node, settings: LinkRangeSettings) {
 	let embedHtml = embed as HTMLElement
 
-	const res = checkLink(app, embedHtml, settings, true, "src");
-	if (res == undefined) {
+	const link = parseLink(app, embedHtml, settings, true, "src");
+	if (link == undefined) {
 		return;
 	}
-
-	const isLinkRange = res !== null && res.h2 !== undefined;
-	const file = res.file
-	let title = res.altText;
-	if (file == undefined || title == undefined) {
-		return;
-	}
+	const isLinkRange = link.h2 !== undefined;
 
 	if (!isLinkRange) {
-		if (res.pattern !== settings.getDefaultPattern()) {
-			updateHeading(embedHtml, title);
+		if (link.pattern !== settings.getDefaultPattern()) {
+			updateHeading(embedHtml, link.altText);
 		}
 		return;
 	}
 
 	const { vault } = app;
 
-	updateHeading(embedHtml, title);
+	updateHeading(embedHtml, link.altText);
 
 	const contentDiv = embedHtml.querySelector('div.markdown-embed-content')
 	if (contentDiv == null || !(contentDiv instanceof HTMLElement)) return;
@@ -35,9 +29,9 @@ export async function replaceEmbed(app: App, embed: Node, settings: LinkRangeSet
 	}
 	contentDiv.childNodes.forEach(x => { x.remove() });
 
-	const fileContent = await vault.cachedRead(file);
+	const fileContent = await vault.cachedRead(link.file);
 	let lines = fileContent.split("\n");
-	lines = lines.slice(res.h1Line, res.h2Line);
+	lines = lines.slice(link.h1Line, link.h2Line);
 	MarkdownRenderer.renderMarkdown(lines.join("\n"), contentDiv, "", null!)
 
 	const linkDiv = embedHtml.querySelector('div.markdown-embed-link')
@@ -62,7 +56,7 @@ export async function replaceEmbed(app: App, embed: Node, settings: LinkRangeSet
 				}
 			};
 
-			leaf?.openFile(file, state);
+			leaf?.openFile(link.file, state);
 		})
 	}
 }
